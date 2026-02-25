@@ -311,7 +311,7 @@ export function ChatShell({
                       <h3 className="text-xl font-bold text-zinc-900">{headerInfo.user.name}</h3>
                       <p className="mt-1 text-xs font-medium text-zinc-500">{onlineUsers?.some(id => id === headerInfo.user._id) ? "Available" : "Not active"}</p>
                     </div>
-                  ) : (
+                  ) : headerInfo.kind === "group" ? (
                     <div className="text-center">
                       <div className="mb-4 flex h-16 w-16 mx-auto place-items-center justify-center rounded-[20px] bg-gradient-to-br from-[#7C5CFF] to-[#A78BFA] text-2xl font-bold text-white shadow-lg">
                         {headerInfo.name.charAt(0)}
@@ -324,7 +324,7 @@ export function ChatShell({
                         ))}
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="mt-8 space-y-4">
@@ -339,7 +339,7 @@ export function ChatShell({
                       >
                         <span>{blockedUserIds.includes(headerInfo.user._id) ? "Unblock Contact" : "Block Contact"}</span>
                       </button>
-                    ) : (
+                    ) : headerInfo.kind === "group" ? (
                       <>
                         <button onClick={() => handleLeaveGroup(selectedConversationId!)} className="flex w-full items-center justify-between rounded-2xl bg-amber-50 px-4 py-3 text-xs font-bold uppercase tracking-tight text-amber-600 ring-1 ring-amber-100 hover:shadow-md">
                           <span>Leave Group</span>
@@ -348,7 +348,7 @@ export function ChatShell({
                           <span>Delete Group</span>
                         </button>
                       </>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
