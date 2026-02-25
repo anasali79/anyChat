@@ -1,15 +1,21 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, QueryCtx } from "./_generated/server";
 
-async function getCurrentUserId(ctx: Parameters<typeof query<any>>[0]) {
+/**
+ * Get current logged-in Convex user _id
+ */
+export const getCurrentUserId = async (ctx: QueryCtx) => {
   const identity = await ctx.auth.getUserIdentity();
+
   if (!identity) {
     throw new Error("Not authenticated");
   }
 
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q) =>
+      q.eq("clerkId", identity.subject)
+    )
     .unique();
 
   if (!user) {
@@ -17,7 +23,7 @@ async function getCurrentUserId(ctx: Parameters<typeof query<any>>[0]) {
   }
 
   return user._id;
-}
+};
 
 export const setTyping = mutation({
   args: {
@@ -31,7 +37,8 @@ export const setTyping = mutation({
     const existing = await ctx.db
       .query("typingStatuses")
       .withIndex("by_conversation_user", (q) =>
-        q.eq("conversationId", args.conversationId).eq("userId", userId)
+        q.eq("conversationId", args.conversationId)
+          .eq("userId", userId)
       )
       .unique();
 
@@ -57,7 +64,7 @@ export const typingForConversation = query({
   },
   handler: async (ctx, args) => {
     const userId = await getCurrentUserId(ctx);
-    const cutoff = Date.now() - 2_500;
+    const cutoff = Date.now() - 2500;
 
     const statuses = await ctx.db
       .query("typingStatuses")
@@ -67,17 +74,21 @@ export const typingForConversation = query({
       .collect();
 
     const active = statuses.filter(
-      (s) => s.userId !== userId && s.isTyping && s.updatedAt >= cutoff
+      (s) =>
+        s.userId !== userId &&
+        s.isTyping &&
+        s.updatedAt >= cutoff
     );
 
     const users = await Promise.all(
       active.map((s) => ctx.db.get(s.userId))
     );
 
-    return users.filter(Boolean).map((user) => ({
-      _id: user!._id,
-      name: user!.name,
-    }));
+    return users
+      .filter(Boolean)
+      .map((user) => ({
+        _id: user!._id,
+        name: user!.name,
+      }));
   },
 });
-
