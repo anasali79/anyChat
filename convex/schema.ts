@@ -26,6 +26,7 @@ export default defineSchema({
     text: v.string(),
     createdAt: v.number(),
     deleted: v.boolean(),
+    replyToId: v.optional(v.id("messages")),
   }).index("by_conversation", ["conversationId", "createdAt"]),
 
   messageReactions: defineTable({
@@ -52,5 +53,12 @@ export default defineSchema({
     userId: v.id("users"),
     lastReadAt: v.number(),
   }).index("by_conversation_user", ["conversationId", "userId"]),
+
+  blockedUsers: defineTable({
+    blockerId: v.id("users"),
+    blockedId: v.id("users"),
+  }).index("by_blockerId", ["blockerId"])
+    .index("by_blockedId", ["blockedId"])
+    .index("by_blocker_and_blocked", ["blockerId", "blockedId"]),
 });
 

@@ -1,6 +1,6 @@
 import { mutation, query } from "./_generated/server";
 
-async function getCurrentUserId(ctx: Parameters<typeof query<any>>[0]) {
+async function getCurrentUserId(ctx: any) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     // When the user is not authenticated yet, silently no-op
@@ -9,7 +9,7 @@ async function getCurrentUserId(ctx: Parameters<typeof query<any>>[0]) {
 
   const user = await ctx.db
     .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+    .withIndex("by_clerk_id", (q: any) => q.eq("clerkId", identity.subject))
     .unique();
 
   if (!user) {

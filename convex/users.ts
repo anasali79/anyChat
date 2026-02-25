@@ -85,11 +85,104 @@ export const searchUsers = query({
     const needle = args.search?.toLowerCase() ?? "";
 
     return allUsers
-      .filter((user) => user._id !== currentUser._id)
       .filter((user) =>
         needle ? user.name.toLowerCase().includes(needle) : true
       )
       .sort((a, b) => a.name.localeCompare(b.name));
+  },
+});
+
+export const toggleBlock = mutation({
+  args: {
+    otherUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const currentUserId = (await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique())?._id;
+
+    if (!currentUserId) throw new Error("User not found");
+    if (currentUserId === args.otherUserId) throw new Error("Cannot block yourself");
+
+    const existing = await ctx.db
+      .query("blockedUsers")
+      .withIndex("by_blocker_and_blocked", (q) =>
+        q.eq("blockerId", currentUserId).eq("blockedId", args.otherUserId)
+      )
+      .unique();
+
+    if (existing) {
+      await ctx.db.delete(existing._id);
+      return { blocked: false };
+    } else {
+      await ctx.db.insert("blockedUsers", {
+        blockerId: currentUserId,
+        blockedId: args.otherUserId,
+      });
+      return { blocked: true };
+    }
+  },
+});
+
+export const getBlockedUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) return [];
+
+    const blocked = await ctx.db
+      .query("blockedUsers")
+      .withIndex("by_blockerId", (q) => q.eq("blockerId", user._id))
+      .collect();
+
+    return blocked.map((b) => b.blockedId);
+  },
+});
+
+export const checkIfBlocked = query({
+  args: {
+    otherUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { amIBlocked: false, didIBlock: false };
+
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) return { amIBlocked: false, didIBlock: false };
+
+    const didIBlock = await ctx.db
+      .query("blockedUsers")
+      .withIndex("by_blocker_and_blocked", (q) =>
+        q.eq("blockerId", currentUser._id).eq("blockedId", args.otherUserId)
+      )
+      .unique();
+
+    const amIBlocked = await ctx.db
+      .query("blockedUsers")
+      .withIndex("by_blocker_and_blocked", (q) =>
+        q.eq("blockerId", args.otherUserId).eq("blockedId", currentUser._id)
+      )
+      .unique();
+
+    return {
+      amIBlocked: !!amIBlocked,
+      didIBlock: !!didIBlock,
+    };
   },
 });
 

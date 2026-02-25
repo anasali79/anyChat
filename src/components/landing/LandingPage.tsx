@@ -329,6 +329,79 @@ export function LandingPage() {
           </div>
         </section>
 
+        {/* Refined AnyChat Privacy Section */}
+        <section className="relative overflow-hidden bg-[#F8F5FF] py-24 md:py-40">
+          {/* Top Decorative Image */}
+          <div className="pointer-events-none absolute -top-10 left-0 right-0 z-0 flex justify-center opacity-40 md:opacity-80">
+            <img
+              src="https://scontent.whatsapp.net/v/t39.8562-34/472789625_593649246596394_5449176563091833632_n.png?stp=dst-webp&ccb=1-7&_nc_sid=73b08c&_nc_ohc=qYLP3xLYFcUQ7kNvwEtZYhz&_nc_oc=AdnZJ2zJ2-5Gg9yeQCxV_jz8dRvINobuIMcMRowIcoZfoTCGbLRGKdTdFnKJwU7Ce8M&_nc_zt=3&_nc_ht=scontent.whatsapp.net&_nc_gid=dSbg1km5XrgQNlUTqkknwQ&oh=01_Q5Aa3wH0-Oo2EsiRg1ylUHx57-hvhmgnU5gS07vpEk3dXWPKnQ&oe=69A33A5E"
+              alt=""
+              className="max-w-[1200px] w-full"
+            />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
+            <span className="mb-4 inline-block rounded-full bg-[#7C5CFF]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-[#7C5CFF]">
+              Privacy First
+            </span>
+            <h2 className="text-balance text-3xl font-semibold leading-[1.2] tracking-tight text-zinc-900 md:text-[48px] lg:text-[56px]">
+              Where meaningful <span className="bg-gradient-to-r from-[#7C5CFF] to-[#4F8DFF] bg-clip-text text-transparent">conversations</span> happen. AnyChat brings you closer with seamless speed and iron-clad privacy.
+            </h2>
+          </div>
+
+          {/* Bottom Decorative Image */}
+          <div className="pointer-events-none absolute -bottom-10 left-0 right-0 z-0 flex justify-center opacity-40 md:opacity-80">
+            <img
+              src="https://scontent.whatsapp.net/v/t39.8562-34/473083383_985260680138627_8314586055954509622_n.png?stp=dst-webp&ccb=1-7&_nc_sid=73b08c&_nc_ohc=Mr84bRc_0RIQ7kNvwEnldNU&_nc_oc=AdkSma2JHOECyD7Xiwu4zgBlZAwDHXv7S2wsH-eLuYzhnV7hRKpY7cNJAlb5Skn7zQA&_nc_zt=3&_nc_ht=scontent.whatsapp.net&_nc_gid=dSbg1km5XrgQNlUTqkknwQ&oh=01_Q5Aa3wG-xl_OXLaZaO5Hhz4R2lAoFGRfFGwX8NEIR3iQrkwmaA&oe=69A3340E"
+              alt=""
+              className="max-w-[1200px] w-full"
+            />
+          </div>
+        </section>
+
+        {/* Groups Section */}
+        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-32">
+          <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
+            {/* Left Column: Text */}
+            <div className="flex flex-col items-start text-left">
+              <h2 className="text-balance text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl lg:text-[54px] lg:leading-[1.1]">
+                Keep in touch <br className="hidden sm:block" /> with your groups
+              </h2>
+              <p className="mt-8 max-w-lg text-lg leading-relaxed text-zinc-600 sm:text-xl">
+                Whether it&apos;s planning an outing with friends or simply staying on top of your family chats, group conversations should feel effortless.
+              </p>
+              <button className="mt-10 inline-flex items-center gap-2 text-base font-semibold text-purple-600  transition hover:underline group">
+                Learn more
+                <span className="text-xl transition-transform group-hover:translate-x-1">›</span>
+              </button>
+            </div>
+
+            {/* Right Column: Phone Mockup & Decoration */}
+            <div className="relative">
+              {/* Phone Image Container */}
+              <div className="relative mx-auto max-w-[420px] animate-in fade-in zoom-in duration-1000">
+                <img
+                  src="https://scontent.whatsapp.net/v/t39.8562-34/473285216_1384759809157265_1212522016876804051_n.png?stp=dst-webp&ccb=1-7&_nc_sid=73b08c&_nc_ohc=hF0xIf9mA4MQ7kNvwFMg6Qc&_nc_oc=Adl7OcJj-o4v0YdDB9JhDi3Dvwc3REQwrtlEvqzcEsdj_c_N6hnUiKpIEz648C4u9co&_nc_zt=3&_nc_ht=scontent.whatsapp.net&_nc_gid=dSbg1km5XrgQNlUTqkknwQ&oh=01_Q5Aa3wGUmd1mXRKj1YKDq0PWHxsoUQPsJqt78QjM6EsoPeUu9Q&oe=69A346ED"
+                  alt="AnyChat Group Interface"
+                  className="relative z-10 w-full drop-shadow-[0_35px_60px_rgba(0,0,0,0.15)]"
+                />
+
+                {/* Floating Chat Elements (URL 1) - Now placed ON TOP with z-20 */}
+                <div className="absolute -inset-2 z-20 pointer-events-none sm:-inset-6">
+                  <img
+                    src="https://scontent.whatsapp.net/v/t39.8562-34/473133701_1117947663095492_624070062160080759_n.png?stp=dst-webp&ccb=1-7&_nc_sid=73b08c&_nc_ohc=lfoZ5RkfU7MQ7kNvwHKXhu0&_nc_oc=Adk5Wrhliq243t0PllpmXAOWjB61DY434dyyydrYn5If2nhWBCG66jHAchk0S0K-AMo&_nc_zt=3&_nc_ht=scontent.whatsapp.net&_nc_gid=dSbg1km5XrgQNlUTqkknwQ&oh=01_Q5Aa3wGUjVmfQJvJQ_ZYydgKr27j3mNif4zO1NfHRbXK3uhT1w&oe=69A34755"
+                    alt=""
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+
+                {/* Subtle shadow glow */}
+                <div className="absolute inset-0 z-0 scale-95 rounded-[60px] bg-gradient-to-b from-[#7C5CFF]/10 to-transparent blur-3xl" />
+              </div>
+            </div>
+          </div>
+        </section>
+
         <footer className="border-t border-zinc-200/70 bg-white/60">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
             <div className="md:col-span-2">
