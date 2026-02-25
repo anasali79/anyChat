@@ -463,7 +463,7 @@ function ConversationView({
                   </p>
                 </div>
               </>
-            ) : (
+            ) : headerInfo.kind === "group" ? (
               <>
                 <div className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-[#7C5CFF] to-[#A78BFA] text-xs font-bold text-white shadow-md">{headerInfo.name.charAt(0)}</div>
                 <div>
@@ -471,7 +471,7 @@ function ConversationView({
                   <p className="text-[11px] font-medium text-zinc-500">{headerInfo.members.length + 1} members</p>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </div>
         <div className="flex items-center gap-3">
