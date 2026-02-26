@@ -5,7 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { SignedIn } from "@clerk/nextjs";
-import { format, isToday, isYesterday } from "date-fns";
+import { formatMessageTimestamp } from "@/lib/dates";
 
 type ConversationSummary = {
   conversation: {
@@ -147,8 +147,16 @@ export function ChatShell({
                 </p>
                 <div className="flex-1 overflow-y-auto rounded-3xl border border-zinc-100 bg-white/50 shadow-sm">
                   {conversations === undefined && (
-                    <div className="flex h-32 items-center justify-center text-xs text-zinc-400">
-                      Loading conversations...
+                    <div className="flex flex-col gap-3 p-4">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="flex items-center gap-3 animate-pulse">
+                          <div className="h-11 w-11 rounded-[18px] bg-zinc-100" />
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 w-24 bg-zinc-100 rounded" />
+                            <div className="h-3 w-40 bg-zinc-50 rounded" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                   {conversations && conversations.length === 0 && (
@@ -189,8 +197,13 @@ export function ChatShell({
                 </p>
                 <div className="flex-1 overflow-y-auto rounded-3xl border border-zinc-100 bg-white/50 shadow-sm">
                   {searchResults === undefined && (
-                    <div className="flex h-32 items-center justify-center text-xs text-zinc-400">
-                      Loading users...
+                    <div className="flex flex-col gap-3 p-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-3 animate-pulse">
+                          <div className="h-10 w-10 rounded-2xl bg-zinc-100" />
+                          <div className="h-4 w-32 bg-zinc-100 rounded" />
+                        </div>
+                      ))}
                     </div>
                   )}
                   {filteredUsers && filteredUsers.length > 0 && (
@@ -378,7 +391,7 @@ function ConversationListItem({ summary, isActive }: { summary: ConversationSumm
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between mb-0.5">
           <p className={`truncate text-sm font-bold ${isActive ? 'text-[#7C5CFF]' : 'text-zinc-900'}`}>{title}</p>
-          {summary.lastMessage && <span className="text-[10px] text-zinc-400 font-medium whitespace-nowrap">{format(summary.lastMessage.createdAt, "h:mm a")}</span>}
+          {summary.lastMessage && <span className="text-[10px] text-zinc-400 font-medium whitespace-nowrap">{formatMessageTimestamp(summary.lastMessage.createdAt)}</span>}
         </div>
         <div className="flex items-center justify-between">
           <p className={`truncate text-xs ${isActive ? 'text-zinc-600 font-medium' : 'text-zinc-500'}`}>{subtitle}</p>
@@ -411,6 +424,9 @@ function ConversationView({
 
   const isTouchDevice = () => typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
+  const [showNewMessageButton, setShowNewMessageButton] = useState(false);
+  const prevMessagesCount = useRef(messages?.length ?? 0);
+
   const blockStatus = useQuery(api.users.checkIfBlocked,
     headerInfo.kind === "direct" ? { otherUserId: headerInfo.user._id } : "skip"
   );
@@ -431,15 +447,33 @@ function ConversationView({
     if (messages?.length) void markRead({ conversationId });
   }, [messages, conversationId, markRead]);
 
+  useEffect(() => {
+    if (messages && messages.length > prevMessagesCount.current) {
+      if (!isNearBottom) {
+        setShowNewMessageButton(true);
+      }
+    }
+    prevMessagesCount.current = messages?.length ?? 0;
+  }, [messages, isNearBottom]);
+
+  useEffect(() => {
+    if (isNearBottom) {
+      setShowNewMessageButton(false);
+    }
+  }, [isNearBottom]);
+
   const handleSend = async () => {
-    const text = input.trim();
-    if (!text) return;
     try {
-      await sendMessage({ conversationId, text, ...(replyTo ? { replyToId: replyTo.id } : {}) });
+      if (input.trim()) {
+        await sendMessage({ conversationId, text: input.trim(), ...(replyTo ? { replyToId: replyTo.id } : {}) });
+      }
       setInput("");
       setReplyTo(null);
       void setTyping({ conversationId, isTyping: false });
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to send message. Please try again.");
+    }
   };
 
   return (
@@ -506,6 +540,16 @@ function ConversationView({
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onClick={() => { setShowHoverControls(null); setEmojiBarFor(null); setMenuFor(null); }}
       >
+        {messages === undefined && (
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`flex gap-3 ${i % 2 === 0 ? "flex-row-reverse" : "flex-row"} animate-pulse`}>
+                <div className="h-8 w-8 rounded-xl bg-zinc-100" />
+                <div className={`h-12 w-48 rounded-[24px] bg-zinc-100 ${i % 2 === 0 ? "rounded-tr-lg" : "rounded-tl-lg"}`} />
+              </div>
+            ))}
+          </div>
+        )}
         {messages?.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center space-y-4 animate-in fade-in duration-700">
             <div className="w-16 h-16 rounded-full bg-[#7C5CFF]/10 flex items-center justify-center">
@@ -558,13 +602,13 @@ function ConversationView({
                     )}
 
                     {message.deleted ? (
-                      <span className="text-[13px] italic opacity-60">Message deleted</span>
+                      <span className="text-[13px] italic opacity-60">This message was deleted</span>
                     ) : (
                       <p className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">{message.text}</p>
                     )}
 
                     <div className={`mt-1.5 flex justify-end text-[9px] font-bold opacity-60`}>
-                      {format(message.createdAt, "h:mm a")}
+                      {formatMessageTimestamp(message.createdAt)}
                     </div>
                   </div>
 
@@ -575,7 +619,7 @@ function ConversationView({
 
                   {emojiBarFor === message._id && (
                     <div className={`absolute -top-10 z-30 flex items-center gap-1 rounded-2xl bg-white p-1.5 shadow-xl ring-1 ring-zinc-200 ${isOwn ? "right-0" : "left-0"}`}>
-                      {(["👍", "❤️", "😂", "😮", "😢", "👏"] as const).map(emoji => (
+                      {(["👍", "❤️", "😂", "😮", "😢"] as const).map(emoji => (
                         <button key={emoji} onClick={(e) => { e.stopPropagation(); onToggleReaction({ messageId: message._id, emoji }); setEmojiBarFor(null); }} className="h-8 w-8 flex items-center justify-center rounded-xl hover:bg-[#7C5CFF]/10 text-lg transition-transform hover:scale-125">{emoji}</button>
                       ))}
                     </div>
@@ -605,6 +649,15 @@ function ConversationView({
           );
         })}
       </div>
+
+      {showNewMessageButton && (
+        <button
+          onClick={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })}
+          className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-[#7C5CFF] shadow-xl ring-1 ring-zinc-100 transition-all hover:scale-105 active:scale-95 animate-in fade-in slide-in-from-bottom-4"
+        >
+          <span>↓ New messages</span>
+        </button>
+      )}
 
       <div className="px-4 pb-2">
         {typingUsers && typingUsers.length > 0 && (

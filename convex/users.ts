@@ -85,6 +85,7 @@ export const searchUsers = query({
     const needle = args.search?.toLowerCase() ?? "";
 
     return allUsers
+      .filter((user) => user._id !== currentUser._id)
       .filter((user) =>
         needle ? user.name.toLowerCase().includes(needle) : true
       )

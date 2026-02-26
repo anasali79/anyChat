@@ -5,23 +5,7 @@ import Link from "next/link";
 
 function ChatLogoMark() {
   return (
-    <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[#7C5CFF] to-[#A78BFA] shadow-[0_10px_30px_rgba(124,92,255,0.35)]">
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path
-          d="M8.5 18.25 6 20.5v-3.25A5.25 5.25 0 0 1 .75 12V7.75A5.25 5.25 0 0 1 6 2.5h12A5.25 5.25 0 0 1 23.25 7.75V12A5.25 5.25 0 0 1 18 17.25H10.5"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
+    <img src="Logo/logo-chatapp.png" alt="Logo" className="h-12 w-12 object-contain transition-transform duration-300 hover:scale-110" />
   );
 }
 
@@ -33,7 +17,7 @@ export function LandingPage() {
           <div className="flex items-center gap-3">
             <ChatLogoMark />
             <span className="text-base font-semibold tracking-tight">
-              AnyChat
+
             </span>
           </div>
 
@@ -134,22 +118,8 @@ export function LandingPage() {
               {/* Center CTA card */}
               <div className="lg:col-span-1">
                 <div className="mx-auto w-full max-w-sm rounded-[28px] bg-white p-8 text-center shadow-[0_30px_120px_rgba(17,24,39,0.14)]">
-                  <div className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#7C5CFF] to-[#A78BFA]">
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M6.5 18.5 4 20.8v-3.3A5.3 5.3 0 0 1 1 12.4V8.4A5.4 5.4 0 0 1 6.4 3h11.2A5.4 5.4 0 0 1 23 8.4v4a5.4 5.4 0 0 1-5.4 5.4H10.7"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                  <div className="mx-auto mb-5 flex justify-center">
+                    <img src="Logo/logo-chatapp.png" alt="AnyChat Logo" className="h-20 w-20 object-contain animate-bounce-subtle" />
                   </div>
 
                   <h1 className="text-balance text-3xl font-semibold tracking-tight text-zinc-900">
@@ -402,7 +372,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <footer className="border-t border-zinc-200/70 bg-white/60">
+        <footer className="border-t border-zinc-200/70 bg-[#fcf5eb]">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3">

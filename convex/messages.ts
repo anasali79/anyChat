@@ -164,8 +164,7 @@ export const toggleReaction = mutation({
       v.literal("❤️"),
       v.literal("😂"),
       v.literal("😮"),
-      v.literal("😢"),
-      v.literal("👏")
+      v.literal("😢")
     ),
   },
   handler: async (ctx, args) => {
