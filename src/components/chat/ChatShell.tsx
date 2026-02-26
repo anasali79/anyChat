@@ -5,7 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { SignedIn } from "@clerk/nextjs";
-import { formatMessageTimestamp } from "@/lib/dates";
+import { formatMessageTimestamp, formatDateDivider } from "@/lib/dates";
 
 type ConversationSummary = {
   conversation: {
@@ -561,89 +561,108 @@ function ConversationView({
             </div>
           </div>
         )}
-        {messages?.map(({ message, sender, isOwn, reactions, replyTo: replyToData }) => {
+        {messages?.map(({ message, sender, isOwn, reactions, replyTo: replyToData }, index) => {
           const showControls = showHoverControls === message._id;
           const isSystemMessage = message.text.includes("has left the group.");
 
+          // Date divider logic
+          const prevMessage = index > 0 ? messages[index - 1] : null;
+          const showDateDivider = !prevMessage ||
+            new Date(message._id === "temp" ? Date.now() : message.createdAt).toDateString() !==
+            new Date(prevMessage.message.createdAt).toDateString();
+
+          const dateDivider = showDateDivider ? (
+            <div key={`date-${message._id}`} className="flex justify-center my-6 sticky top-2 z-10">
+              <div className="px-4 py-1 rounded-2xl bg-white/90 backdrop-blur-sm border border-zinc-200/50 text-[10px] font-bold text-zinc-500 uppercase tracking-widest shadow-sm ring-1 ring-zinc-200/20">
+                {formatDateDivider(message.createdAt)}
+              </div>
+            </div>
+          ) : null;
+
           if (isSystemMessage) {
             return (
-              <div key={message._id} className="flex justify-center my-4 animate-in fade-in zoom-in duration-500">
-                <div className="px-4 py-1.5 rounded-full bg-zinc-100/80 backdrop-blur-sm border border-zinc-200/50 text-[11px] font-bold text-zinc-500 uppercase tracking-widest shadow-sm">
-                  {message.text}
+              <div key={message._id}>
+                {dateDivider}
+                <div className="flex justify-center my-4 animate-in fade-in zoom-in duration-500">
+                  <div className="px-4 py-1.5 rounded-full bg-zinc-100/80 backdrop-blur-sm border border-zinc-200/50 text-[11px] font-bold text-zinc-500 uppercase tracking-widest shadow-sm">
+                    {message.text}
+                  </div>
                 </div>
               </div>
             );
           }
 
           return (
-            <div
-              key={message._id}
-              onMouseEnter={() => !isTouchDevice() && setShowHoverControls(message._id)}
-              onMouseLeave={() => !isTouchDevice() && setShowHoverControls(null)}
-              onClick={(e) => { if (isTouchDevice()) { e.stopPropagation(); setShowHoverControls(p => p === message._id ? null : message._id); } }}
-              className={`group relative flex gap-3 ${isOwn ? "flex-row-reverse" : "flex-row"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
-            >
-              {!isOwn && sender && (
-                <div className="flex-none pt-1">
-                  <img src={sender.imageUrl} className="h-8 w-8 rounded-xl object-cover shadow-sm ring-1 ring-zinc-200/50" />
-                </div>
-              )}
+            <div key={message._id}>
+              {dateDivider}
+              <div
+                onMouseEnter={() => !isTouchDevice() && setShowHoverControls(message._id)}
+                onMouseLeave={() => !isTouchDevice() && setShowHoverControls(null)}
+                onClick={(e) => { if (isTouchDevice()) { e.stopPropagation(); setShowHoverControls(p => p === message._id ? null : message._id); } }}
+                className={`group relative flex gap-3 ${isOwn ? "flex-row-reverse" : "flex-row"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+              >
+                {!isOwn && sender && (
+                  <div className="flex-none pt-1">
+                    <img src={sender.imageUrl} className="h-8 w-8 rounded-xl object-cover shadow-sm ring-1 ring-zinc-200/50" />
+                  </div>
+                )}
 
-              <div className={`flex flex-col gap-1 max-w-[80%] ${isOwn ? "items-end" : "items-start"}`}>
-                {sender && !isOwn && <span className="px-2 text-[10px] font-bold text-[#7C5CFF] uppercase tracking-widest">{sender.name}</span>}
+                <div className={`flex flex-col gap-1 max-w-[80%] ${isOwn ? "items-end" : "items-start"}`}>
+                  {sender && !isOwn && <span className="px-2 text-[10px] font-bold text-[#7C5CFF] uppercase tracking-widest">{sender.name}</span>}
 
-                <div className={`relative flex items-center gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
-                  <div className={`relative px-4 py-3 rounded-[24px] shadow-sm ring-1 ${isOwn ? "bg-gradient-to-br from-[#7C5CFF] to-[#947DFF] text-white ring-[#7C5CFF]/10 rounded-tr-lg" : "bg-white text-zinc-900 ring-zinc-200/50 rounded-tl-lg"}`}>
-                    {replyToData && !message.deleted && (
-                      <div className={`mb-2 p-2 rounded-xl text-[11px] border-l-4 ${isOwn ? "bg-white/10 border-white/50 text-white/90" : "bg-zinc-50 border-[#7C5CFF] text-zinc-600"}`}>
-                        <p className="font-bold text-[10px] mb-0.5">{replyToData.senderName}</p>
-                        <p className="line-clamp-1 opacity-80 italic">{replyToData.text}</p>
+                  <div className={`relative flex items-center gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+                    <div className={`relative px-4 py-3 rounded-[24px] shadow-sm ring-1 ${isOwn ? "bg-gradient-to-br from-[#7C5CFF] to-[#947DFF] text-white ring-[#7C5CFF]/10 rounded-tr-lg" : "bg-white text-zinc-900 ring-zinc-200/50 rounded-tl-lg"}`}>
+                      {replyToData && !message.deleted && (
+                        <div className={`mb-2 p-2 rounded-xl text-[11px] border-l-4 ${isOwn ? "bg-white/10 border-white/50 text-white/90" : "bg-zinc-50 border-[#7C5CFF] text-zinc-600"}`}>
+                          <p className="font-bold text-[10px] mb-0.5">{replyToData.senderName}</p>
+                          <p className="line-clamp-1 opacity-80 italic">{replyToData.text}</p>
+                        </div>
+                      )}
+
+                      {message.deleted ? (
+                        <span className="text-[13px] italic opacity-60">This message was deleted</span>
+                      ) : (
+                        <p className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">{message.text}</p>
+                      )}
+
+                      <div className={`mt-1.5 flex justify-end text-[9px] font-bold opacity-60`}>
+                        {formatMessageTimestamp(message.createdAt)}
+                      </div>
+                    </div>
+
+                    <div className={`flex flex-col gap-1 transition-all ${showControls ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 pointer-events-none"} ${!isTouchDevice() && "group-hover:opacity-100 group-hover:translate-x-0 group-hover:pointer-events-auto"}`}>
+                      <button onClick={(e) => { e.stopPropagation(); setEmojiBarFor(message._id); }} className="h-7 w-7 rounded-xl bg-white shadow-md ring-1 ring-zinc-100 flex items-center justify-center text-xs">😊</button>
+                      <button onClick={(e) => { e.stopPropagation(); setMenuFor(message._id); }} className="h-7 w-7 rounded-xl bg-white shadow-md ring-1 ring-zinc-100 flex items-center justify-center text-zinc-400"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg></button>
+                    </div>
+
+                    {emojiBarFor === message._id && (
+                      <div className={`absolute -top-10 z-30 flex items-center gap-1 rounded-2xl bg-white p-1.5 shadow-xl ring-1 ring-zinc-200 ${isOwn ? "right-0" : "left-0"}`}>
+                        {(["👍", "❤️", "😂", "😮", "😢"] as const).map(emoji => (
+                          <button key={emoji} onClick={(e) => { e.stopPropagation(); onToggleReaction({ messageId: message._id, emoji }); setEmojiBarFor(null); }} className="h-8 w-8 flex items-center justify-center rounded-xl hover:bg-[#7C5CFF]/10 text-lg transition-transform hover:scale-125">{emoji}</button>
+                        ))}
                       </div>
                     )}
 
-                    {message.deleted ? (
-                      <span className="text-[13px] italic opacity-60">This message was deleted</span>
-                    ) : (
-                      <p className="text-[14px] leading-relaxed break-words whitespace-pre-wrap">{message.text}</p>
+                    {menuFor === message._id && (
+                      <div className={`absolute z-30 w-32 bg-white rounded-2xl shadow-2xl ring-1 ring-zinc-200 overflow-hidden top-12 ${isOwn ? "right-0" : "left-0"}`}>
+                        <button onClick={(e) => { e.stopPropagation(); setReplyTo({ id: message._id, text: message.text, senderName: sender?.name }); setMenuFor(null); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-zinc-50">Reply</button>
+                        {isOwn && <button onClick={(e) => { e.stopPropagation(); onDelete({ messageId: message._id }); setMenuFor(null); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50">Delete</button>}
+                      </div>
                     )}
-
-                    <div className={`mt-1.5 flex justify-end text-[9px] font-bold opacity-60`}>
-                      {formatMessageTimestamp(message.createdAt)}
-                    </div>
                   </div>
 
-                  <div className={`flex flex-col gap-1 transition-all ${showControls ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 pointer-events-none"} ${!isTouchDevice() && "group-hover:opacity-100 group-hover:translate-x-0 group-hover:pointer-events-auto"}`}>
-                    <button onClick={(e) => { e.stopPropagation(); setEmojiBarFor(message._id); }} className="h-7 w-7 rounded-xl bg-white shadow-md ring-1 ring-zinc-100 flex items-center justify-center text-xs">😊</button>
-                    <button onClick={(e) => { e.stopPropagation(); setMenuFor(message._id); }} className="h-7 w-7 rounded-xl bg-white shadow-md ring-1 ring-zinc-100 flex items-center justify-center text-zinc-400"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg></button>
-                  </div>
-
-                  {emojiBarFor === message._id && (
-                    <div className={`absolute -top-10 z-30 flex items-center gap-1 rounded-2xl bg-white p-1.5 shadow-xl ring-1 ring-zinc-200 ${isOwn ? "right-0" : "left-0"}`}>
-                      {(["👍", "❤️", "😂", "😮", "😢"] as const).map(emoji => (
-                        <button key={emoji} onClick={(e) => { e.stopPropagation(); onToggleReaction({ messageId: message._id, emoji }); setEmojiBarFor(null); }} className="h-8 w-8 flex items-center justify-center rounded-xl hover:bg-[#7C5CFF]/10 text-lg transition-transform hover:scale-125">{emoji}</button>
-                      ))}
-                    </div>
-                  )}
-
-                  {menuFor === message._id && (
-                    <div className={`absolute z-30 w-32 bg-white rounded-2xl shadow-2xl ring-1 ring-zinc-200 overflow-hidden top-12 ${isOwn ? "right-0" : "left-0"}`}>
-                      <button onClick={(e) => { e.stopPropagation(); setReplyTo({ id: message._id, text: message.text, senderName: sender?.name }); setMenuFor(null); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-zinc-50">Reply</button>
-                      {isOwn && <button onClick={(e) => { e.stopPropagation(); onDelete({ messageId: message._id }); setMenuFor(null); }} className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50">Delete</button>}
-                    </div>
-                  )}
+                  {reactions?.length > 0 && (() => {
+                    const counts: Record<string, number> = {};
+                    for (const r of reactions) counts[r.emoji] = (counts[r.emoji] ?? 0) + 1;
+                    return (
+                      <div className={`flex flex-wrap gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
+                        {Object.entries(counts).map(([emoji, count]) => (
+                          <button key={emoji} onClick={() => onToggleReaction({ messageId: message._id, emoji })} className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[11px] font-bold ring-1 ring-zinc-100 shadow-sm hover:ring-zinc-200"><span>{emoji}</span><span className="opacity-60 text-[9px]">{count}</span></button>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
-
-                {reactions?.length > 0 && (() => {
-                  const counts: Record<string, number> = {};
-                  for (const r of reactions) counts[r.emoji] = (counts[r.emoji] ?? 0) + 1;
-                  return (
-                    <div className={`flex flex-wrap gap-1 mt-1 ${isOwn ? "justify-end" : "justify-start"}`}>
-                      {Object.entries(counts).map(([emoji, count]) => (
-                        <button key={emoji} onClick={() => onToggleReaction({ messageId: message._id, emoji })} className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[11px] font-bold ring-1 ring-zinc-100 shadow-sm hover:ring-zinc-200"><span>{emoji}</span><span className="opacity-60 text-[9px]">{count}</span></button>
-                      ))}
-                    </div>
-                  );
-                })()}
               </div>
             </div>
           );
